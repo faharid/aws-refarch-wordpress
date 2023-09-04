@@ -299,9 +299,9 @@ Mappings:
 
   RegionMap:
     ap-northeast-1:
-      AMI: ami-0972bc93137492016
+      AMI: ami-0de5311b2a443fb89
     ap-northeast-2:
-      AMI: ami-0e2d4a4a78c35da2b
+      AMI: ami-09cf633fe86e51bf0
     ap-south-1:
       AMI: ami-0e6329e222e662a52
     ap-southeast-1:
@@ -367,14 +367,23 @@ Resources:
       Cooldown: 60
       HealthCheckGracePeriod: 120
       HealthCheckType: ELB
-      LaunchConfigurationName:
-        !If
+      LaunchTemplate:
+        LaunchTemplateId: !If
           [ PHP80,
-          !Ref WebLaunchConfiguration80,
-          !If
-            [ PHP70,
-            !Ref WebLaunchConfiguration70,
-            !Ref WebLaunchConfiguration56
+            !Ref WebLaunchTemplate80,
+            !If [
+              PHP56,
+              !Ref WebLaunchTemplate56,
+              !Ref WebLaunchTemplate70
+              ]
+            ]
+        Version: !If
+          [ PHP80,
+            !GetAtt WebLaunchTemplate80.LatestVersionNumber,
+            !If [
+              PHP56,
+              !GetAtt WebLaunchTemplate56.LatestVersionNumber,
+              !GetAtt WebLaunchTemplate70.LatestVersionNumber,
             ]
           ]
       MaxSize: !Ref WebAsgMax
@@ -411,9 +420,9 @@ Resources:
       ResourceSignal:
         Count: !Ref WebAsgMin
         Timeout: PT60M
-  WebLaunchConfiguration80:
+  WebLaunchTemplate80:
     Condition: PHP80
-    Type: AWS::AutoScaling::LaunchConfiguration
+    Type: AWS::EC2::LaunchTemplate
     Metadata:
       AWS::CloudFormation::Init:
         configSets:
@@ -607,16 +616,18 @@ Resources:
                 enabled: true
                 ensureRunning: true
     Properties:
-      IamInstanceProfile: !Ref WebInstanceProfile
-      ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
-      InstanceMonitoring: true
-      InstanceType: !Ref WebInstanceType
-      KeyName: !Ref EC2KeyName
-      SecurityGroups:
-      - !Ref WebSecurityGroup
-      UserData:
-        "Fn::Base64":
-          !Sub |
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name: !Ref WebInstanceProfile
+        ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+        Monitoring:
+          Enabled: true
+        InstanceType: !Ref WebInstanceType
+        KeyName: !Ref EC2KeyName
+        SecurityGroupIds:
+          - !Ref WebSecurityGroup
+        UserData:
+          "Fn::Base64": !Sub |
             #!/bin/bash -xe
             yum update -y
             amazon-linux-extras enable php8.0
@@ -625,9 +636,9 @@ Resources:
             mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${ElasticFileSystem}.efs.${AWS::Region}.amazonaws.com:/ /var/www/wordpress
             /opt/aws/bin/cfn-init --configsets deploy_webserver --verbose --stack ${AWS::StackName} --resource WebLaunchConfiguration80 --region ${AWS::Region}
             /opt/aws/bin/cfn-signal --exit-code $? --stack ${AWS::StackName} --resource WebAutoScalingGroup --region ${AWS::Region}
-  WebLaunchConfiguration56:
+  WebLaunchTemplate56:
     Condition: PHP56
-    Type: AWS::AutoScaling::LaunchConfiguration
+    Type: AWS::EC2::LaunchTemplate
     Metadata:
       AWS::CloudFormation::Init:
         configSets:
@@ -817,25 +828,27 @@ Resources:
                 enabled: true
                 ensureRunning: true
     Properties:
-      IamInstanceProfile: !Ref WebInstanceProfile
-      ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
-      InstanceMonitoring: true
-      InstanceType: !Ref WebInstanceType
-      KeyName: !Ref EC2KeyName
-      SecurityGroups:
-      - !Ref WebSecurityGroup
-      UserData:
-        "Fn::Base64":
-          !Sub |
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name: !Ref WebInstanceProfile
+        ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+        Monitoring:
+          Enabled: true
+        InstanceType: !Ref WebInstanceType
+        KeyName: !Ref EC2KeyName
+        SecurityGroupIds:
+          - !Ref WebSecurityGroup
+        UserData:
+          "Fn::Base64": !Sub |
             #!/bin/bash -xe
             yum update -y
             mkdir -p /var/www/wordpress
             mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${ElasticFileSystem}.efs.${AWS::Region}.amazonaws.com:/ /var/www/wordpress
             /opt/aws/bin/cfn-init --configsets deploy_webserver --verbose --stack ${AWS::StackName} --resource WebLaunchConfiguration56 --region ${AWS::Region}
             /opt/aws/bin/cfn-signal --exit-code $? --stack ${AWS::StackName} --resource WebAutoScalingGroup --region ${AWS::Region}
-  WebLaunchConfiguration70:
+  WebLaunchTemplate70:
     Condition: PHP70
-    Type: AWS::AutoScaling::LaunchConfiguration
+    Type: AWS::EC2::LaunchTemplate
     Metadata:
       AWS::CloudFormation::Init:
         configSets:
@@ -1026,16 +1039,18 @@ Resources:
                 enabled: true
                 ensureRunning: true
     Properties:
-      IamInstanceProfile: !Ref WebInstanceProfile
-      ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
-      InstanceMonitoring: true
-      InstanceType: !Ref WebInstanceType
-      KeyName: !Ref EC2KeyName
-      SecurityGroups:
-      - !Ref WebSecurityGroup
-      UserData:
-        "Fn::Base64":
-          !Sub |
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name: !Ref WebInstanceProfile
+        ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+        Monitoring:
+          Enabled: true
+        InstanceType: !Ref WebInstanceType
+        KeyName: !Ref EC2KeyName
+        SecurityGroupIds:
+          - !Ref WebSecurityGroup
+        UserData:
+          "Fn::Base64": !Sub |
             #!/bin/bash -xe
             yum update -y
             mkdir -p /var/www/wordpress
