@@ -150,10 +150,10 @@ Parameters:
     Type: String
   PHPVersion:
     AllowedValues:
-    - 8.0
+    - 8
     - 7.4
     - 5.5
-    Default: 8.0
+    Default: 8
     Description: The version of PHP to install.
     Type: String 
   PublicAlbTargetGroupArn:
@@ -258,12 +258,14 @@ Conditions:
     !Equals [ 5, !Ref NumberOfSubnets ]
   NumberOfSubnets6:
     !Equals [ 6, !Ref NumberOfSubnets ]
-  PHP80:
+  PHP81:
     !Equals [ 8.1, !Ref PHPVersion ]
-  PHP56:
-    !Equals [ 8.0, !Ref PHPVersion ]
+  PHP80:
+    !Equals [ 8, !Ref PHPVersion ]
   PHP70:
     !Equals [ 7.4, !Ref PHPVersion ]
+  PHP56:
+    !Equals [ 5.6, !Ref PHPVersion ]
   Subnet0: !Or
     - !Condition NumberOfSubnets1
     - !Condition NumberOfSubnets2
@@ -297,9 +299,9 @@ Mappings:
 
   RegionMap:
     ap-northeast-1:
-      AMI: ami-0de5311b2a443fb89
+      AMI: ami-0972bc93137492016
     ap-northeast-2:
-      AMI: ami-09cf633fe86e51bf0
+      AMI: ami-0e2d4a4a78c35da2b
     ap-south-1:
       AMI: ami-0e6329e222e662a52
     ap-southeast-1:
@@ -317,9 +319,9 @@ Mappings:
     sa-east-1:
       AMI: ami-0122c4b16734197ac
     us-east-1:
-      AMI: ami-09d3b3274b6c5d4aa
+      AMI: ami-0fe6142abb6c5cf39
     us-east-2:
-      AMI: ami-089a545a9ed9893b6
+      AMI: ami-0f88abf1223b9c9de
     us-west-1:
       AMI: ami-017c001a88dd93847
     us-west-2:
@@ -370,10 +372,10 @@ Resources:
           [ PHP80,
           !Ref WebLaunchConfiguration80,
           !If
-            [ PHP56,
-            !Ref WebLaunchConfiguration56,
-            !Ref WebLaunchConfiguration70
-            ]          
+            [ PHP70,
+            !Ref WebLaunchConfiguration70,
+            !Ref WebLaunchConfiguration56
+            ]
           ]
       MaxSize: !Ref WebAsgMax
       MinSize: !Ref WebAsgMin
@@ -438,9 +440,9 @@ Resources:
                 !Join [
                   "",[
                     "#!/bin/bash -xe\n",
-                    "amazon-linux-extras enable php8.0",
-                    "yum clean metadata",
-                    "yum install php", 
+                    "amazon-linux-extras enable php8.0\n",
+                    "yum clean metadata\n",
+                    "yum -y install php\n", 
                     "if [ ! -f /etc/httpd/conf.d/", !Ref WPDirectory, ".conf ]; then\n",                    
                     "   touch /etc/httpd/conf.d/", !Ref WPDirectory, ".conf\n",
                     "   echo 'ServerName 127.0.0.1:80' >> /etc/httpd/conf.d/", !Ref WPDirectory, ".conf\n",

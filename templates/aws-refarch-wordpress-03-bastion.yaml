@@ -60,7 +60,7 @@ Parameters:
     - 6
     Default: 3
     Description: Number of subnets. This must match your selections in the list of subnets below.
-    Type: String 
+    Type: String
   Subnet:
     Description: Select existing subnets. The number selected must match the number of subnets above. Subnets selected must be in separate AZs.
     Type: List<AWS::EC2::Subnet::Id>
@@ -130,9 +130,9 @@ Mappings:
     sa-east-1:
       AMI: ami-0122c4b16734197ac
     us-east-1:
-      AMI: ami-09d3b3274b6c5d4aa
+      AMI: ami-0fe6142abb6c5cf39
     us-east-2:
-      AMI: ami-089a545a9ed9893b6
+      AMI: ami-0f88abf1223b9c9de
     us-west-1:
       AMI: ami-017c001a88dd93847
     us-west-2:
@@ -146,7 +146,9 @@ Resources:
       Cooldown: 60
       HealthCheckGracePeriod: 120
       HealthCheckType: EC2
-      LaunchConfigurationName: !Ref BastionLaunchConfiguration
+      LaunchTemplate:
+        LaunchTemplateId: !Ref BastionLaunchTemplate
+        Version: !GetAtt BastionLaunchTemplate.LatestVersionNumber
       MaxSize: 1
       MinSize: 0
       Tags:
@@ -175,16 +177,19 @@ Resources:
               ]
             ]
           ]
-  BastionLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  BastionLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      IamInstanceProfile: !Ref BastionInstanceProfile
-      ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
-      InstanceMonitoring: true
-      InstanceType: !Ref BastionInstanceType
-      KeyName: !Ref EC2KeyName
-      SecurityGroups:
-        - !Ref BastionSecurityGroup
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name: !Ref BastionInstanceProfile
+        ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+        Monitoring:
+          Enabled: true
+        InstanceType: !Ref BastionInstanceType
+        KeyName: !Ref EC2KeyName
+        SecurityGroupIds:
+          - !Ref BastionSecurityGroup
   BastionInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

@@ -231,9 +231,9 @@ Mappings:
     sa-east-1:
       AMI: ami-0122c4b16734197ac
     us-east-1:
-      AMI: ami-09d3b3274b6c5d4aa
+      AMI: ami-0fe6142abb6c5cf39
     us-east-2:
-      AMI: ami-089a545a9ed9893b6
+      AMI: ami-0f88abf1223b9c9de
     us-west-1:
       AMI: ami-017c001a88dd93847
     us-west-2:
@@ -336,7 +336,9 @@ Resources:
       Cooldown: 60
       HealthCheckGracePeriod: 120
       HealthCheckType: EC2
-      LaunchConfigurationName: !Ref LaunchConfiguration
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
       MaxSize: 1
       MinSize: 0
       DesiredCapacity: 1
@@ -381,8 +383,8 @@ Resources:
       Cooldown: 60
       PolicyType: SimpleScaling
       ScalingAdjustment: 1
-  LaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Metadata:
       AWS::CloudFormation::Init:
         configSets:
@@ -481,37 +483,40 @@ Resources:
               owner: root
               group: root
     Properties:
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 10
-            VolumeType: gp2
-      IamInstanceProfile: !Ref InstanceProfile
-      ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
-      InstanceMonitoring: true
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref EC2KeyName
-      SecurityGroups:
-      - !Ref SecurityGroup
-      UserData:
-        "Fn::Base64":
-          !Join [
-            "",[
-            "#cloud-config\n",
-            "repo_update: true\n",
-            "repo_upgrade: all\n",
-            "\n",
-            "packages:\n",
-            "- parallel\n",
-            "\n",
-            "runcmd:\n",
-            "- yum --enablerepo=epel install nload -y\n",
-            "- ntpstat\n",
-            "- /opt/aws/bin/cfn-init --configsets efs_add_storage --verbose --stack ", !Ref 'AWS::StackName', " --resource LaunchConfiguration --region ", !Ref 'AWS::Region',"\n",
-            "- /opt/aws/bin/cfn-signal -e $? --stack ", !Ref 'AWS::StackName', " --resource AutoScalingGroup --region ", !Ref 'AWS::Region',"\n"
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 10
+              VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref InstanceProfile
+        ImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+        Monitoring:
+          Enabled: true
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref EC2KeyName
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        UserData:
+          "Fn::Base64":
+            !Join [
+              "",[
+              "#cloud-config\n",
+              "repo_update: true\n",
+              "repo_upgrade: all\n",
+              "\n",
+              "packages:\n",
+              "- parallel\n",
+              "\n",
+              "runcmd:\n",
+              "- yum --enablerepo=epel install nload -y\n",
+              "- ntpstat\n",
+              "- /opt/aws/bin/cfn-init --configsets efs_add_storage --verbose --stack ", !Ref 'AWS::StackName', " --resource LaunchConfiguration --region ", !Ref 'AWS::Region',"\n",
+              "- /opt/aws/bin/cfn-signal -e $? --stack ", !Ref 'AWS::StackName', " --resource AutoScalingGroup --region ", !Ref 'AWS::Region',"\n"
+              ]
             ]
-          ]
   EfsSizeMonitorFunction:
     Type: AWS::Lambda::Function
     Properties: 
