@@ -467,7 +467,7 @@ Parameters:
   PHPIniOverride:
     Description: Full Amazon S3 https path to a php.ini override file (e.g. https://s3.amazonaws.com/aws-refarch/wordpress/latest/bits/20-aws.ini)
     Type: String
-    Default: https://s3.amazonaws.com/aws-refarch/wordpress/latest/bits/20-aws.ini
+    Default: https://inec-cloudformation.s3.amazonaws.com/20-aws.ini
   PHPVersion:
     AllowedValues:
     - 8.1
@@ -526,7 +526,7 @@ Parameters:
       - t3.medium
       - t3.large
     ConstraintDescription: Must be a valid Amazon EC2 instance type.
-    Default: t3.micro
+    Default: t3.large
     Description: The Amazon EC2 instance type for your web instances.
     Type: String
   AdminEmail:
