@@ -473,7 +473,7 @@ Parameters:
     - 8.1
     - 8
     - 7.4
-    Default: 8
+    Default: 8.1
     Description: The version of PHP to install.
     Type: String 
   PublicAlbAcmCertificate:
@@ -558,7 +558,7 @@ Parameters:
   WPLocale:
     Description: "The main language of the WordPress site, as per https://codex.WordPress.org/Installing_WordPress_in_Your_Language. The default is 'en_GB'."
     Type: String
-    Default: en_GB
+    Default: en_US
   WPTitle:
     Default: Inec Somos
     AllowedPattern: ^([a-zA-Z0-9])([a-zA-Z0-9 _-]*)([a-zA-Z0-9])$
@@ -770,29 +770,29 @@ Resources:
         WPDomainName:
           !Ref WPDomainName
       TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-04-cloudfront.yaml
-  dashboardwithalarms:
-    Condition: EfsCreateAlarms
-    DependsOn: [ newvpc, securitygroups, publicalb, efsfilesystem, rds, efsalarms ]
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        ElasticFileSystem:
-          !GetAtt [ efsfilesystem, Outputs.ElasticFileSystem ]
-        DatabaseCluster:
-          !GetAtt [ rds, Outputs.DatabaseCluster ]
-        BurstCreditBalanceDecreaseAlarmArn:
-          !GetAtt [ efsalarms, Outputs.BurstCreditBalanceDecreaseAlarmArn ]
-        BurstCreditBalanceIncreaseAlarmArn:
-          !GetAtt [ efsalarms, Outputs.BurstCreditBalanceIncreaseAlarmArn ]
-        CriticalAlarmArn:
-          !GetAtt [ efsalarms, Outputs.CriticalAlarmArn ]
-        WarningAlarmArn:
-          !GetAtt [ efsalarms, Outputs.WarningAlarmArn ]
-        PublicAlbFullName:
-          !GetAtt [ publicalb, Outputs.PublicAlbFullName ]
-        EfsCreateAlarms:
-          !Ref EfsCreateAlarms         
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
+  # dashboardwithalarms:
+  #   Condition: EfsCreateAlarms
+  #   DependsOn: [ newvpc, securitygroups, publicalb, efsfilesystem, rds, efsalarms ]
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       ElasticFileSystem:
+  #         !GetAtt [ efsfilesystem, Outputs.ElasticFileSystem ]
+  #       DatabaseCluster:
+  #         !GetAtt [ rds, Outputs.DatabaseCluster ]
+  #       BurstCreditBalanceDecreaseAlarmArn:
+  #         !GetAtt [ efsalarms, Outputs.BurstCreditBalanceDecreaseAlarmArn ]
+  #       BurstCreditBalanceIncreaseAlarmArn:
+  #         !GetAtt [ efsalarms, Outputs.BurstCreditBalanceIncreaseAlarmArn ]
+  #       CriticalAlarmArn:
+  #         !GetAtt [ efsalarms, Outputs.CriticalAlarmArn ]
+  #       WarningAlarmArn:
+  #         !GetAtt [ efsalarms, Outputs.WarningAlarmArn ]
+  #       PublicAlbFullName:
+  #         !GetAtt [ publicalb, Outputs.PublicAlbFullName ]
+  #       EfsCreateAlarms:
+  #         !Ref EfsCreateAlarms         
+  #     TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
   dashboardwithnoalarms:
     Condition: EfsCreateNoAlarms
     DependsOn: [ newvpc, securitygroups, publicalb, efsfilesystem, rds ]
@@ -834,31 +834,31 @@ Resources:
         Subnet:
           !GetAtt [ newvpc, Outputs.DataSubnet ]
       TemplateURL: https://inec-cloudformation.s3.amazonaws.com/aws-refarch-wordpress-03-efsfilesystem.yaml
-  efsalarms:
-    Condition: EfsCreateAlarms
-    DependsOn: [ efsfilesystem ]
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        CriticalThreshold:
-          !Ref EfsCriticalThreshold
-        EC2KeyName:
-          !Ref EC2KeyName
-        ElasticFileSystem:
-          !GetAtt [ efsfilesystem, Outputs.ElasticFileSystem ]
-        EmailAddress:
-          !Ref AdminEmail
-        SecurityGroup:
-          !GetAtt [ securitygroups, Outputs.EfsSecurityGroup ]
-        InstanceType:
-          !Ref EfsAlarmsInstanceType
-        NumberOfSubnets:
-          !Ref NumberOfAZs  
-        Subnet:
-          !GetAtt [ newvpc, Outputs.DataSubnet ]
-        WarningThreshold:
-          !Ref EfsWarningThreshold
-      TemplateURL: https://inec-cloudformation.s3.amazonaws.com/aws-refarch-wordpress-03-efsalarms.yaml
+  # efsalarms:
+  #   Condition: EfsCreateAlarms
+  #   DependsOn: [ efsfilesystem ]
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       CriticalThreshold:
+  #         !Ref EfsCriticalThreshold
+  #       EC2KeyName:
+  #         !Ref EC2KeyName
+  #       ElasticFileSystem:
+  #         !GetAtt [ efsfilesystem, Outputs.ElasticFileSystem ]
+  #       EmailAddress:
+  #         !Ref AdminEmail
+  #       SecurityGroup:
+  #         !GetAtt [ securitygroups, Outputs.EfsSecurityGroup ]
+  #       InstanceType:
+  #         !Ref EfsAlarmsInstanceType
+  #       NumberOfSubnets:
+  #         !Ref NumberOfAZs  
+  #       Subnet:
+  #         !GetAtt [ newvpc, Outputs.DataSubnet ]
+  #       WarningThreshold:
+  #         !Ref EfsWarningThreshold
+  #     TemplateURL: https://inec-cloudformation.s3.amazonaws.com/aws-refarch-wordpress-03-efsalarms.yaml
   elasticache:
     Condition: DeployElastiCache
     DependsOn: [ newvpc, securitygroups ]
@@ -924,7 +924,7 @@ Resources:
           !Ref DataSubnet4Cidr
         DataSubnet5Cidr:
           !Ref DataSubnet5Cidr
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-01-newvpc.yaml
+      TemplateURL: https://inec-cloudformation.s3.amazonaws.com/aws-refarch-wordpress-01-newvpc.yaml
   publicalb:
     Condition: AvailableAWSRegion
     DependsOn: [ newvpc, securitygroups ]
@@ -941,7 +941,7 @@ Resources:
           !GetAtt [ securitygroups, Outputs.PublicAlbSecurityGroup ]
         Vpc:
           !GetAtt [ newvpc, Outputs.Vpc ]
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-publicalb.yaml
+      TemplateURL: https://inec-cloudformation.s3.amazonaws.com/aws-refarch-wordpress-03-publicalb.yaml
   rds:
     Condition: AvailableAWSRegion
     DependsOn: [ newvpc, securitygroups ]
