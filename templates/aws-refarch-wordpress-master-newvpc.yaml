@@ -228,10 +228,11 @@ Parameters:
   CloudFrontAcmCertificate:
     AllowedPattern: ^$|(arn:aws:acm:)([a-z0-9/:-])*([a-z0-9])$
     Description: '[ Optional ] The AWS Certification Manager certificate ARN for the CloudFront distribution certificate - this certificate should be created in the us-east-1 (N. Virginia) region and must reference the WordPress domain name you use below.'
-    Default: arn:aws:acm:us-east-1:110559912807:certificate/5af5a05b-8ee1-4bb6-bfc4-c10c8fb8c697
+    Default: arn:aws:acm:us-east-1:110559912807:certificate/7adb8017-ceed-4ba8-839e-91596eaf76da
     Type: String
   DatabaseCmk:
     Description: AWS KMS Customer Master Key (CMK) to encrypt database cluster
+    Default: arn:aws:kms:us-east-1:110559912807:key/0a005aae-16bf-4483-9325-540b05b38c2b
     Type: String
   DatabaseEncrpytedBoolean:
     AllowedValues:
@@ -336,7 +337,6 @@ Parameters:
     - t3.small
     - t3.medium
     - t3.large
-    - t3.xlarge
     - t3.2xlarge
     - m3.medium
     - m3.large 
@@ -465,6 +465,7 @@ Parameters:
   EC2KeyName:
     ConstraintDescription: Must be letters (upper or lower), numbers, and special characters.
     Description: Name of an EC2 KeyPair. Your bastion & Web instances will launch with this KeyPair.
+    Default: inec
     Type: AWS::EC2::KeyPair::KeyName
   PHPIniOverride:
     Description: Full Amazon S3 https path to a php.ini override file (e.g. https://s3.amazonaws.com/aws-refarch/wordpress/latest/bits/20-aws.ini)
@@ -481,7 +482,7 @@ Parameters:
   PublicAlbAcmCertificate:
     AllowedPattern: ^$|(arn:aws:acm:)([a-z0-9/:-])*([a-z0-9])$
     Description: '[ Optional ] The AWS Certification Manager certificate ARN for the ALB certificate - this certificate should be created in the region you wish to run the ALB and must reference the WordPress domain name you use below.'
-    Default: arn:aws:acm:us-east-1:110559912807:certificate/5af5a05b-8ee1-4bb6-bfc4-c10c8fb8c697
+    Default: arn:aws:acm:us-east-1:110559912807:certificate/7adb8017-ceed-4ba8-839e-91596eaf76da
     Type: String
   SshAccessCidr:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
@@ -528,8 +529,9 @@ Parameters:
       - t3.small
       - t3.medium
       - t3.large
+      - t3.xlarge
     ConstraintDescription: Must be a valid Amazon EC2 instance type.
-    Default: t3.large
+    Default: t3.xlarge
     Description: The Amazon EC2 instance type for your web instances.
     Type: String
   AdminEmail:

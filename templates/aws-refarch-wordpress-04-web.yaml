@@ -190,6 +190,7 @@ Parameters:
     - t3.small
     - t3.medium
     - t3.large
+    - t3.xlarge
     ConstraintDescription: Must be a valid Amazon EC2 instance type.
     Default: t3.large
     Description: The Amazon EC2 instance type for your web instances.
@@ -425,7 +426,7 @@ Resources:
                 !Join [
                   "",[
                     "#!/bin/bash -xe\n",
-                    "amazon-linux-extras enable php8.0\n",
+                    "amazon-linux-extras enable php8.2\n",
                     "yum clean metadata\n",
                     "yum -y install php\n", 
                     "if [ ! -f /etc/httpd/conf.d/", !Ref WPDirectory, ".conf ]; then\n",                    
@@ -463,7 +464,7 @@ Resources:
                 !Join [
                   "",[
                     "#!/bin/bash -xe\n",
-                    "amazon-linux-extras enable php8.0\n",
+                    "amazon-linux-extras enable php8.2\n",
                     "yum clean metadata\n",
                     "yum -y install php\n", 
                     "sudo pecl install igbinary\n",
@@ -527,9 +528,9 @@ Resources:
                     "   if ! $(wp core is-installed --allow-root); then\n",
                     "       wp core download --version='", !Ref WPVersion, "' --locale='", !Ref WPLocale, "' --allow-root\n",  
                     "       wp core config --dbname='", !Ref DatabaseName, "' --dbuser='", !Ref DatabaseMasterUsername, "' --dbpass='", !Ref DatabaseMasterPassword, "' --dbhost='", !Ref DatabaseClusterEndpointAddress, "' --dbprefix=wp_ --allow-root\n",
-                    "       wp core install --url=", !If [ NoWPDomainName, !Ref PublicAlbHostname, !Join [ "", [ "'http://www.", !Ref WPDomainName, "'" ] ] ], " --title='", !Ref WPTitle, "' --admin_user='", !Ref WPAdminUsername, "' --admin_password='", !Ref WPAdminPassword, "' --admin_email='", !Ref WPAdminEmail, "' --skip-email --allow-root\n",
-                    "       sed -i \"/$table_prefix = 'wp_';/ a \\define('WP_HOME', 'http://' . \\$_SERVER['HTTP_HOST']); \" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n",
-                    "       sed -i \"/$table_prefix = 'wp_';/ a \\define('WP_SITEURL', 'http://' . \\$_SERVER['HTTP_HOST']); \" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n",
+                    "       wp core install --url=", !If [ NoWPDomainName, !Ref PublicAlbHostname, !Join [ "", [ "'https://www.", !Ref WPDomainName, "'" ] ] ], " --title='", !Ref WPTitle, "' --admin_user='", !Ref WPAdminUsername, "' --admin_password='", !Ref WPAdminPassword, "' --admin_email='", !Ref WPAdminEmail, "' --skip-email --allow-root\n",
+                    "       sed -i \"/$table_prefix = 'wp_';/ a \\define('WP_HOME', 'https://' . \\$_SERVER['HTTP_HOST']); \" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n",
+                    "       sed -i \"/$table_prefix = 'wp_';/ a \\define('WP_SITEURL', 'https://' . \\$_SERVER['HTTP_HOST']); \" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n",
                     "       # enable HTTPS in wp-config.php if ACM Public SSL Certificate parameter was not empty\n",
                             !If [ NoSslCertificate, !Join [ '', [ "       sed -i \"/$table_prefix = 'wp_';/ a \\# No ACM Public SSL Certificate \" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n" ] ] , !Join [ '', [ "       sed -i \"/$table_prefix = 'wp_';/ a \\$_SERVER['HTTPS'] = 'on';\" /var/www/wordpress/", !Ref WPDirectory, "/wp-config.php\n" ] ] ],
                     "\n",
@@ -611,7 +612,7 @@ Resources:
           "Fn::Base64": !Sub |
             #!/bin/bash -xe
             yum update -y
-            amazon-linux-extras enable php8.0
+            amazon-linux-extras enable php8.2
             yum clean metadata
             mkdir -p /var/www/wordpress
             mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${ElasticFileSystem}.efs.${AWS::Region}.amazonaws.com:/ /var/www/wordpress
